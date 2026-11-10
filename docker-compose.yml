@@ -1,0 +1,31 @@
+name: mount-bot
+
+services:
+    rule-bot:
+        build:
+            context: ./mount-rule-bot
+        image: mount-rule-bot:latest
+        env_file:
+            - ./mount-rule-bot/.env
+        init: true
+        restart: unless-stopped
+
+    voice-bot:
+        build:
+            context: ./mount-voice-bot
+        image: mount-voice-bot:latest
+        env_file:
+            - ./mount-voice-bot/.env
+        init: true
+        restart: unless-stopped
+
+    rule-init:
+        image: mount-rule-bot:latest
+        build:
+            context: ./mount-rule-bot
+        command: ['pnpm', 'run', 'init']
+        env_file:
+            - ./mount-rule-bot/.env
+        profiles:
+            - tools
+        restart: 'no'
