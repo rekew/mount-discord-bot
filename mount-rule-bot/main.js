@@ -63,8 +63,18 @@ client.once('clientReady', async () => {
     }
 
     const embed = new EmbedBuilder()
-        .setTitle('Выберите опцию')
-        .setDescription('Выберите что-то снизу из меню')
+        .setTitle('ПРАВИЛА ПРОЕКТА')
+        .setDescription(
+            `Мы поддерживаем свободное общение, сохраняя при этом чёткие границы допустимого поведения. Проект допускает жёсткий стиль общения, ненормативную лексику и соревновательный токсинг, если они не переходят в травлю, угрозы, преследование или другие недопустимые действия.
+
+Сервер придерживается Правил сообщества Discord и условий использования платформы. Все участники обязаны соблюдать как внутренние правила проекта, так и официальные требования Discord.
+
+Ознакомиться с официальными правилами можно здесь:
+- [Правила сообщества Discord](https://discord.com/guidelines)
+- [Условия использования Discord](https://discord.com/terms)
+
+Выберите нужный раздел ниже, чтобы ознакомиться с подробной информацией.`
+        )
         .setColor(EMBED_COLOR);
 
     const options = Object.entries(RULE_TITLES).map(([value, { label, description }]) => ({
@@ -110,7 +120,7 @@ client.on('interactionCreate', async (interaction) => {
         console.error(`[select] failed key=${key}`, err);
 
         if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ content: 'Ошибка при загрузке правил.', flags: MessageFlags.Ephemeral }).catch(() => {});
+            await interaction.reply({ content: 'Ошибка при загрузке правил.', flags: MessageFlags.Ephemeral }).catch(() => { });
         }
     }
 })
