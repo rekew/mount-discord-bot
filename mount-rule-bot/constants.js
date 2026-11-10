@@ -1,3 +1,10 @@
+export const SECTION_TITLES = {
+    '1': 'Общие Правила',
+    '2': 'Правила Чата',
+    '3': 'Правила Войса',
+    '4': 'При Получение Бана',
+};
+
 export const RULE_CHOICES = {
     ads: 'ads',
     security: 'security',
