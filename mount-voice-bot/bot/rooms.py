@@ -40,7 +40,7 @@ async def get_owned_room(
     return channel
 
 
-def get_kickable_members(
+def get_room_members(
     room: discord.VoiceChannel,
     owner_id: Optional[int] = None,
 ) -> List[discord.Member]:
@@ -52,6 +52,24 @@ def get_kickable_members(
         for member in room.members
         if not member.bot and member.id != resolved_owner_id
     ]
+
+
+def is_member_muted(room: discord.VoiceChannel, member: discord.Member) -> bool:
+    """Return ``True`` when ``member`` cannot speak in the given room."""
+    return room.overwrites_for(member).speak is False
+
+
+async def set_member_muted(
+    room: discord.VoiceChannel,
+    member: discord.Member,
+    muted: bool,
+    reason: Optional[str] = None,
+) -> None:
+    """Allow or deny speaking for ``member`` in this room only."""
+    overwrite = room.overwrites_for(member)
+    overwrite.speak = False if muted else None
+
+    await room.set_permissions(member, overwrite=overwrite, reason=reason)
 
 
 def is_room_private(room: discord.VoiceChannel) -> bool:

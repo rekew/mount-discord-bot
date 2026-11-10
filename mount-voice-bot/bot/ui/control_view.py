@@ -5,9 +5,16 @@ import discord
 
 # Local modules
 from bot import texts
-from bot.rooms import get_kickable_members, get_owned_room, is_room_private, set_room_privacy
+from bot.rooms import (
+    get_owned_room,
+    get_room_members,
+    is_room_private,
+    set_room_privacy,
+)
 from bot.ui.kick import KickView
 from bot.ui.modals import LimitModal, RenameModal
+from bot.ui.mute import MuteView
+from bot.ui.transfer import TransferView
 
 
 class VoiceControlView(discord.ui.View):
@@ -50,7 +57,7 @@ class VoiceControlView(discord.ui.View):
         if channel is None:
             return
 
-        if not get_kickable_members(channel):
+        if not get_room_members(channel):
             await interaction.response.send_message(
                 texts.KICK_NO_MEMBERS,
                 ephemeral=True,
@@ -64,10 +71,68 @@ class VoiceControlView(discord.ui.View):
         )
 
     @discord.ui.button(
+        emoji=texts.EMOJI_MUTE,
+        style=discord.ButtonStyle.secondary,
+        custom_id="mount_mute",
+        row=1,
+    )
+    async def mute(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button,
+    ) -> None:
+        """Show the member selection menu for muting inside the room."""
+        channel = await get_owned_room(interaction)
+        if channel is None:
+            return
+
+        if not get_room_members(channel):
+            await interaction.response.send_message(
+                texts.MUTE_NO_MEMBERS,
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.send_message(
+            texts.MUTE_PROMPT,
+            view=MuteView(channel),
+            ephemeral=True,
+        )
+
+    @discord.ui.button(
+        emoji=texts.EMOJI_TRANSFER,
+        style=discord.ButtonStyle.secondary,
+        custom_id="mount_transfer",
+        row=1,
+    )
+    async def transfer(
+        self,
+        interaction: discord.Interaction,
+        button: discord.ui.Button,
+    ) -> None:
+        """Show the member selection menu for handing over the room."""
+        channel = await get_owned_room(interaction)
+        if channel is None:
+            return
+
+        if not get_room_members(channel):
+            await interaction.response.send_message(
+                texts.TRANSFER_NO_MEMBERS,
+                ephemeral=True,
+            )
+            return
+
+        await interaction.response.send_message(
+            texts.TRANSFER_PROMPT,
+            view=TransferView(channel),
+            ephemeral=True,
+        )
+
+    @discord.ui.button(
         emoji=texts.EMOJI_LIMIT,
         style=discord.ButtonStyle.secondary,
         custom_id="mount_limit",
-        row=1,
+        row=2,
     )
     async def limit(
         self,
@@ -85,7 +150,7 @@ class VoiceControlView(discord.ui.View):
         emoji=texts.EMOJI_PRIVACY,
         style=discord.ButtonStyle.secondary,
         custom_id="mount_privacy",
-        row=1,
+        row=2,
     )
     async def privacy(
         self,

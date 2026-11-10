@@ -5,7 +5,7 @@ import discord
 
 # Local modules
 from bot import texts
-from bot.rooms import get_kickable_members, is_room_owner
+from bot.rooms import get_room_members, is_room_owner
 from bot.state import get_room_owner_id
 
 
@@ -16,7 +16,7 @@ class KickSelect(discord.ui.Select):
         self.room_id: int = room.id
 
         owner_id = get_room_owner_id(room.id)
-        members = get_kickable_members(room, owner_id)
+        members = get_room_members(room, owner_id)
 
         options = [
             discord.SelectOption(
@@ -60,14 +60,14 @@ class KickSelect(discord.ui.Select):
 
         if member is None or member.voice is None or member.voice.channel is None:
             await interaction.response.send_message(
-                texts.KICK_MEMBER_LEFT_VOICE,
+                texts.MEMBER_LEFT_VOICE,
                 ephemeral=True,
             )
             return
 
         if member.voice.channel.id != room.id:
             await interaction.response.send_message(
-                texts.KICK_MEMBER_LEFT_ROOM,
+                texts.MEMBER_LEFT_ROOM,
                 ephemeral=True,
             )
             return
