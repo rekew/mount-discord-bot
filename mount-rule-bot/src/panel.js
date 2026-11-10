@@ -4,7 +4,11 @@
  */
 
 // Local modules
-import { RULE_CHANNEL_ID, RULE_CHANNEL_SELECT_ID } from './config.js';
+import {
+    RULE_CHANNEL_FOR_NON_VERIFIED_ID,
+    RULE_CHANNEL_FOR_VERIFIED,
+    RULE_CHANNEL_SELECT_ID,
+} from './config.js';
 import { PANEL_SCAN_LIMIT } from './constants.js';
 import { buildRulesPanelEmbed, buildRulesPanelRow } from './embeds.js';
 
@@ -26,22 +30,31 @@ function containsPanelSelect(message, selectId) {
  * @returns {Promise<void>}
  */
 export async function ensureRulesPanel(client) {
-    const channel = await client.channels.fetch(RULE_CHANNEL_ID);
-    const recent = await channel.messages.fetch({ limit: PANEL_SCAN_LIMIT });
+    const channelIds = [RULE_CHANNEL_FOR_NON_VERIFIED_ID, RULE_CHANNEL_FOR_VERIFIED];
 
-    const alreadySent = recent.some(
-        (message) =>
-            message.author.id === client.user.id &&
-            containsPanelSelect(message, RULE_CHANNEL_SELECT_ID),
-    );
+    for (const channelId of channelIds) {
+        try {
+            const channel = await client.channels.fetch(channelId);
+            const recent = await channel.messages.fetch({ limit: PANEL_SCAN_LIMIT });
 
-    if (alreadySent) {
-        console.log('Rules panel already exists, skipping...');
-        return;
+            const alreadySent = recent.some(
+                (message) =>
+                    message.author.id === client.user.id &&
+                    containsPanelSelect(message, RULE_CHANNEL_SELECT_ID),
+            );
+
+            if (alreadySent) {
+                console.log(`Rules panel already exists in channel ${channelId}, skipping...`);
+                continue;
+            }
+
+            await channel.send({
+                embeds: [buildRulesPanelEmbed()],
+                components: [buildRulesPanelRow(RULE_CHANNEL_SELECT_ID)],
+            });
+            console.log(`Rules panel sent to channel ${channelId}.`);
+        } catch (error) {
+            console.error(`[panel] failed to set up channel ${channelId}`, error);
+        }
     }
-
-    await channel.send({
-        embeds: [buildRulesPanelEmbed()],
-        components: [buildRulesPanelRow(RULE_CHANNEL_SELECT_ID)],
-    });
 }
