@@ -1,5 +1,8 @@
 """Member selection UI for muting members inside a temporary voice room."""
 
+# Python modules
+import logging
+
 # Third-party modules
 import discord
 
@@ -12,6 +15,65 @@ from bot.rooms import (
     set_member_muted,
 )
 from bot.state import get_room_owner_id
+
+
+logger = logging.getLogger(__name__)
+MUTE_RECONNECT_CHANNEL_ID = 1569776643952746587
+
+
+async def _reconnect_member_in_room(
+    room: discord.VoiceChannel,
+    member: discord.Member,
+) -> bool:
+    """Move the member through another accessible voice channel and back."""
+    bot_member = room.guild.me
+    if bot_member is None:
+        return False
+
+    staging_channel = room.guild.get_channel(MUTE_RECONNECT_CHANNEL_ID)
+    if not isinstance(staging_channel, discord.VoiceChannel):
+        logger.error(
+            "Mute reconnect channel %s is missing or is not a voice channel",
+            MUTE_RECONNECT_CHANNEL_ID,
+        )
+        return False
+    if staging_channel.id == room.id:
+        logger.error("Mute reconnect channel cannot be the managed room %s", room.id)
+        return False
+    bot_channel_permissions = staging_channel.permissions_for(bot_member)
+    if not bot_channel_permissions.view_channel or not bot_member.guild_permissions.move_members:
+        logger.error(
+            "Bot lacks permission to move member %s through mute reconnect channel %s "
+            "(view_channel=%s, move_members=%s)",
+            member.id,
+            staging_channel.id,
+            bot_channel_permissions.view_channel,
+            bot_member.guild_permissions.move_members,
+        )
+        return False
+
+    await member.move_to(staging_channel, reason="Обновление голосовых прав комнаты")
+    try:
+        await member.move_to(room, reason="Применение запрета говорить в комнате")
+    except (discord.Forbidden, discord.HTTPException):
+        logger.exception(
+            "Could not return member %s to room %s after staging move",
+            member.id,
+            room.id,
+        )
+        try:
+            await member.move_to(
+                room,
+                reason="Повторная попытка вернуть участника в комнату",
+            )
+        except (discord.Forbidden, discord.HTTPException):
+            logger.exception(
+                "Could not restore member %s to room %s",
+                member.id,
+                room.id,
+            )
+        raise
+    return True
 
 
 class MuteSelect(discord.ui.Select):
@@ -87,12 +149,73 @@ class MuteSelect(discord.ui.Select):
             texts.UNMUTE_REASON_TEMPLATE if was_muted else texts.MUTE_REASON_TEMPLATE
         )
 
-        await set_member_muted(
-            room,
-            member,
-            muted=not was_muted,
-            reason=reason_template.format(owner=interaction.user),
-        )
+        muted = not was_muted
+        try:
+            await set_member_muted(
+                room,
+                member,
+                muted=muted,
+                reason=reason_template.format(owner=interaction.user),
+            )
+        except discord.Forbidden:
+            logger.exception(
+                "Permission denied while changing mute for member %s in room %s",
+                member.id,
+                room.id,
+            )
+            await interaction.response.send_message(
+                "❌ Не удалось изменить права участника. Проверьте, что у бота есть Manage Channels.",
+                ephemeral=True,
+            )
+            return
+        except discord.HTTPException:
+            logger.exception(
+                "Discord API error while changing mute for member %s in room %s",
+                member.id,
+                room.id,
+            )
+            await interaction.response.send_message(
+                "❌ Discord не смог применить изменение. Попробуйте ещё раз.",
+                ephemeral=True,
+            )
+            return
+
+        try:
+            reconnected = await _reconnect_member_in_room(room, member)
+        except discord.Forbidden:
+            logger.exception(
+                "Permission denied while reconnecting member %s in room %s",
+                member.id,
+                room.id,
+            )
+            await interaction.response.send_message(
+                "✅ Права участника изменены, но бот не смог переместить его. Проверьте право Move Members и верните участника в комнату, если он остался в другом канале.",
+                ephemeral=True,
+            )
+            return
+        except discord.HTTPException:
+            logger.exception(
+                "Discord API error while reconnecting member %s in room %s",
+                member.id,
+                room.id,
+            )
+            await interaction.response.send_message(
+                "✅ Права участника изменены, но Discord не смог переместить его. Проверьте, что участник находится в исходной комнате.",
+                ephemeral=True,
+            )
+            return
+
+        if not reconnected:
+            logger.warning(
+                "Permission change applied, but reconnect could not be completed for member %s in room %s",
+                member.id,
+                room.id,
+            )
+            await interaction.response.send_message(
+                "✅ Права участника изменены, но подключение не обновлено. Проверьте staging voice-канал и наличие у бота права Move Members.",
+                ephemeral=True,
+            )
+            return
 
         message = (
             texts.UNMUTE_SUCCESS if was_muted else texts.MUTE_SUCCESS

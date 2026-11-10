@@ -132,7 +132,7 @@ class VoiceControlView(discord.ui.View):
         emoji=texts.EMOJI_LIMIT,
         style=discord.ButtonStyle.secondary,
         custom_id="mount_limit",
-        row=2,
+        row=1,
     )
     async def limit(
         self,
@@ -150,7 +150,7 @@ class VoiceControlView(discord.ui.View):
         emoji=texts.EMOJI_PRIVACY,
         style=discord.ButtonStyle.secondary,
         custom_id="mount_privacy",
-        row=2,
+        row=0,
     )
     async def privacy(
         self,
