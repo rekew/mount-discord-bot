@@ -14,8 +14,11 @@ dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) });
 /** Discord bot token. */
 export const TOKEN = process.env.TOKEN;
 
-/** Channel where the rules panel is published. */
-export const RULE_CHANNEL_ID = process.env.RULE_CHANNEL_ID;
+/** Channel where the rules panel is published for non-verified members. */
+export const RULE_CHANNEL_FOR_NON_VERIFIED_ID = process.env.RULE_CHANNEL_FOR_NON_VERIFIED_ID;
+
+/** Channel where the rules panel is published for verified members. */
+export const RULE_CHANNEL_FOR_VERIFIED = process.env.RULE_CHANNEL_FOR_VERIFIED;
 
 /** Custom id of the rules section select menu. */
 export const RULE_CHANNEL_SELECT_ID = process.env.RULE_CHANNEL_SELECT_ID;
@@ -35,7 +38,8 @@ export const RULE_STORAGE_MESSAGE_IDS = {
 export const BOT_ENV_KEYS = [
     'TOKEN',
     'RULE_STORAGE_CHANNEL_ID',
-    'RULE_CHANNEL_ID',
+    'RULE_CHANNEL_FOR_NON_VERIFIED_ID',
+    'RULE_CHANNEL_FOR_VERIFIED',
     'RULE_CHANNEL_SELECT_ID',
 ];
 
