@@ -25,6 +25,27 @@ const STORAGE_MESSAGE_IDS = {
     ban: process.env.RULE_BAN_MESSAGE_ID,
 };
 
+const CACHE_TTL = 12 * 60 * 60 * 1000;
+const embedCache = new Map();
+
+async function getSectionEmbeds(key) {
+    const cached = embedCache.get(key);
+    if (cached && Date.now() < cached.expiresAt) return cached.embeds;
+
+    const messageId = STORAGE_MESSAGE_IDS[key];
+    if (!RULE_TITLES[key] || !messageId) {
+        console.warn(`[select] unresolved key=${key} messageId=${messageId}`);
+        return null;
+    }
+
+    const channel = await client.channels.fetch(RULE_STORAGE_CHANNEL_ID);
+    const source = await channel.messages.fetch(messageId);
+    if (!source.embeds.length) return [];
+
+    embedCache.set(key, { embeds: source.embeds, expiresAt: Date.now() + CACHE_TTL });
+    return source.embeds;
+}
+
 client.once('clientReady', async () => {
     console.log(`Logged in as ${client.user.tag}`)
 
@@ -70,24 +91,21 @@ client.on('interactionCreate', async (interaction) => {
     const t0 = performance.now();
 
     try {
-        const messageId = STORAGE_MESSAGE_IDS[key];
-        if (!RULE_TITLES[key] || !messageId) {
-            console.warn(`[select] unresolved key=${key} messageId=${messageId}`);
+        const embeds = await getSectionEmbeds(key);
+
+        if (embeds === null) {
             await interaction.reply({ content: 'Раздел не настроен.', flags: MessageFlags.Ephemeral });
             return;
         }
 
-        const channel = await client.channels.fetch(RULE_STORAGE_CHANNEL_ID);
-        const source = await channel.messages.fetch(messageId);
-
-        if (!source.embeds.length) {
+        if (!embeds.length) {
             await interaction.reply({ content: 'В разделе нет изображений.', flags: MessageFlags.Ephemeral });
             return;
         }
 
-        await interaction.reply({ embeds: source.embeds, flags: MessageFlags.Ephemeral });
+        await interaction.reply({ embeds, flags: MessageFlags.Ephemeral });
 
-        console.log(`[select] key=${key} embeds=${source.embeds.length} total=${(performance.now() - t0).toFixed(0)}ms`);
+        console.log(`[select] key=${key} embeds=${embeds.length} total=${(performance.now() - t0).toFixed(0)}ms`);
     } catch (err) {
         console.error(`[select] failed key=${key}`, err);
 

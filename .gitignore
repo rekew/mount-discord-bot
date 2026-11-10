@@ -3,3 +3,4 @@ venv/
 .env
 
 node_modules/
+mount-rule-bot/images/original/
