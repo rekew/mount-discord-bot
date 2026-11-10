@@ -1,3 +1,9 @@
+/**
+ * Static domain constants for the rules bot.
+ * @module constants
+ */
+
+/** Metadata for each rule section shown in the select menu. */
 export const RULE_TITLES = {
     general: {
         section: 1,
@@ -21,15 +27,16 @@ export const RULE_TITLES = {
     },
 };
 
-export const RULE_IMAGES = {
-    general: ['1.1.png', '1.2.png', '1.3.png', '1.4.png', '1.5.png', '1.6.png', '1.7.png', '1.8.png', '1.9.png'],
-    chat: ['2.1.png', '2.2.png', '2.3.png'],
-    voice: ['3.1.png', '3.2.png'],
-    ban: ['4.1.png', '4.2.png', '4.3.png'],
-};
-
+/** Section number mapped to its human-readable title. */
 export const SECTION_TITLES = Object.fromEntries(
-    Object.values(RULE_TITLES).map(({ section, label }) => [String(section), label])
+    Object.values(RULE_TITLES).map(({ section, label }) => [String(section), label]),
 );
 
-export const EMBED_COLOR = '#293636'
+/** Accent color used by every rule embed. */
+export const EMBED_COLOR = '#293636';
+
+/** How long fetched section embeds stay cached (12 hours). */
+export const EMBED_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
+
+/** Number of recent panel-channel messages scanned for an existing panel. */
+export const PANEL_SCAN_LIMIT = 10;
