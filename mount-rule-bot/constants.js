@@ -1,47 +1,35 @@
-export const SECTION_TITLES = {
-    '1': 'Общие Правила',
-    '2': 'Правила Чата',
-    '3': 'Правила Войса',
-    '4': 'При Получение Бана',
-};
-
-export const RULE_CHOICES = {
-    ads: 'ads',
-    security: 'security',
-    content: 'content',
-    behavior: 'behavior',
-    profile: 'profile',
-}
-
 export const RULE_TITLES = {
-    ads: {
-        label: 'Реклама и коммерция',
-        description: 'Правило 1.1: реклама и сбор средств',
+    general: {
+        section: 1,
+        label: 'Общие Правила',
+        description: 'Правила 1.1–1.9: основы поведения на сервере',
     },
-    security: {
-        label: 'Безопасность и приватность',
-        description: 'Правила 1.2, 1.3: данные, угрозы, обход наказаний',
+    chat: {
+        section: 2,
+        label: 'Правила Чата',
+        description: 'Правила 2.1–2.3: общение в текстовых каналах',
     },
-    content: {
-        label: 'Запрещённый контент',
-        description: 'Правила 1.4, 1.5: ненависть и запрещённые темы',
+    voice: {
+        section: 3,
+        label: 'Правила Войса',
+        description: 'Правила 3.1–3.2: поведение в голосовых каналах',
     },
-    behavior: {
-        label: 'Поведение и общение',
-        description: 'Правила 1.7, 1.8, 1.9: жалобы, конфликты, язык',
-    },
-    profile: {
-        label: 'Оформление профиля',
-        description: 'Правило 1.6: никнеймы, роли, личные комнаты',
+    ban: {
+        section: 4,
+        label: 'При Получение Бана',
+        description: 'Правила 4.1–4.3: что делать при получении бана',
     },
 };
 
 export const RULE_IMAGES = {
-    ads: ['1.1.png'],
-    security: ['1.2.png', '1.3.png'],
-    content: ['1.4.png', '1.5.png'],
-    behavior: ['1.7.png', '1.8.png', '1.9.png'],
-    profile: ['1.6.png'],
+    general: ['1.1.png', '1.2.png', '1.3.png', '1.4.png', '1.5.png', '1.6.png', '1.7.png', '1.8.png', '1.9.png'],
+    chat: ['2.1.png', '2.2.png', '2.3.png'],
+    voice: ['3.1.png', '3.2.png'],
+    ban: ['4.1.png', '4.2.png', '4.3.png'],
 };
+
+export const SECTION_TITLES = Object.fromEntries(
+    Object.values(RULE_TITLES).map(({ section, label }) => [String(section), label])
+);
 
 export const EMBED_COLOR = '#293636'
