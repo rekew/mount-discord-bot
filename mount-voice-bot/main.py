@@ -250,10 +250,10 @@ class VoiceControlView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="Переименовать",
         emoji="✏️",
-        style=discord.ButtonStyle.primary,
-        custom_id="mount_rename"
+        style=discord.ButtonStyle.secondary,
+        custom_id="mount_rename",
+        row=0
     )
     async def rename(self, interaction, button):
 
@@ -264,10 +264,10 @@ class VoiceControlView(discord.ui.View):
         await interaction.response.send_modal(RenameModal())
 
     @discord.ui.button(
-        label="Исключить участника",
         emoji="🚫",
-        style=discord.ButtonStyle.danger,
-        custom_id="mount_kick"
+        style=discord.ButtonStyle.secondary,
+        custom_id="mount_kick",
+        row=0,
     )
     async def kick(self, interaction, button):
 
@@ -289,10 +289,10 @@ class VoiceControlView(discord.ui.View):
         )
 
     @discord.ui.button(
-        label="Лимит участников",
         emoji="👥",
         style=discord.ButtonStyle.secondary,
-        custom_id="mount_limit"
+        custom_id="mount_limit",
+        row=1,
     )
     async def limit(self, interaction, button):
 
@@ -303,10 +303,10 @@ class VoiceControlView(discord.ui.View):
         await interaction.response.send_modal(LimitModal())
 
     @discord.ui.button(
-        label="Приватность",
         emoji="🔒",
-        style=discord.ButtonStyle.success,
-        custom_id="mount_privacy"
+        style=discord.ButtonStyle.secondary,
+        custom_id="mount_privacy",
+        row=1,
     )
     async def privacy(self, interaction, button):
 
