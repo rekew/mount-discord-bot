@@ -20,6 +20,9 @@ PANEL_CHANNEL_ID: int = 1567150052902699218
 # Marker stored in the panel embed footer to locate it after restarts.
 PANEL_MARKER: str = "mount-bot-control-panel"
 
+# Accent color shared with the rules bot.
+EMBED_COLOR: str = "#2F3E3D"
+
 # Upper bound for the room member limit.
 MAX_USER_LIMIT: int = 99
 

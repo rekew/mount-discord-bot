@@ -8,7 +8,7 @@ import discord
 
 # Local modules
 from bot import texts
-from bot.config import PANEL_CHANNEL_ID, PANEL_MARKER
+from bot.config import EMBED_COLOR, PANEL_CHANNEL_ID, PANEL_MARKER
 from bot.ui.control_view import VoiceControlView
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ def create_panel_embed() -> discord.Embed:
     embed = discord.Embed(
         title=texts.PANEL_TITLE,
         description=texts.PANEL_DESCRIPTION,
-        color=discord.Color.blurple(),
+        color=discord.Color.from_str(EMBED_COLOR),
     )
     embed.set_footer(text=PANEL_MARKER)
     return embed

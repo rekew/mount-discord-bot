@@ -32,8 +32,8 @@ export const SECTION_TITLES = Object.fromEntries(
     Object.values(RULE_TITLES).map(({ section, label }) => [String(section), label]),
 );
 
-/** Accent color used by every rule embed. */
-export const EMBED_COLOR = '#293636';
+/** Accent color shared with the voice bot. */
+export const EMBED_COLOR = '#2F3E3D';
 
 /** How long fetched section embeds stay cached (12 hours). */
 export const EMBED_CACHE_TTL_MS = 12 * 60 * 60 * 1000;
